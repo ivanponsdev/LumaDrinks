@@ -1,0 +1,22 @@
+/*globals.css*/
+@import "tailwindcss";
+
+@theme {
+  /* Brand palette — Luma */
+  --color-brand-bg:      #F7F5F2;
+  --color-brand-surface: #E8E1D9;
+  --color-brand-muted:   #B7A89A;
+  --color-brand-primary: #2B2B2B;
+  --color-brand-accent:  #7A8F7C;
+
+  /* Typography */
+  --font-sans:      Inter, 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: 'Playfair Display', Canela, ui-serif, serif;
+}
+
+body {
+  background-color: #F7F5F2;
+  color: #2B2B2B;
+  margin: 0;
+  font-family: Inter, 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
+}
