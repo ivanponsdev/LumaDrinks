@@ -100,6 +100,14 @@ Estado de estilos (actualizado 2026-04-08)
 - `ProductCard`, `CartModal`, `ProductDetailModal` → tema oscuro completo, pendientes de migrar a paleta cálida clara
 - Detalles completos del estado de cada componente en `/memories/repo/frontend-style-state.md`
 
+Auth — decisiones de diseño tomadas
+- Estrategia: Supabase Auth (opción A). El frontend usa `@supabase/supabase-js`; el backend verifica el JWT contra el JWKS endpoint de Supabase (`SUPABASE_URL/auth/v1/.well-known/jwks.json`).
+- NestJS: `AuthModule` con `JwtStrategy` (RS256, `jwks-rsa`) + `JwtAuthGuard` reutilizable.
+- `UsersModule`: `UsersService.findOrCreate()` sincroniza el perfil en la tabla `public.users` al primer login.
+- Variables de entorno requeridas en backend: `SUPABASE_URL` (ya existía `DATABASE_URL`).
+- Rutas protegidas: `GET /auth/me` (devuelve perfil), `PATCH /auth/profile` (actualiza nombre).
+- Para proteger cualquier ruta: `@UseGuards(JwtAuthGuard)`.
+
 Estado de implementación (Fase 1 — Tienda)
 - [x] `CartContext` + `localStorage`
 - [x] Badge de cantidad en icono 🛒 del Navbar
@@ -111,6 +119,22 @@ Estado de implementación (Fase 1 — Tienda)
 - [x] `ProductDetailModal` — modal con descripción detallada, beneficios y botón "Añadir al carrito"
 - [ ] Página `/checkout` — formulario simulado
 - [ ] Página `/order-confirmation`
+
+Estado de implementación (Fase 2 — Cuentas y Auth)
+- [x] Backend: `AuthModule` + `JwtStrategy` (RS256, JWKS de Supabase) + `JwtAuthGuard`
+- [x] Backend: `UsersModule` + `UsersService` (`findOrCreate`, `updateProfile`)
+- [x] Backend: `GET /auth/me` + `PATCH /auth/profile` protegidos con `JwtAuthGuard`
+- [x] Supabase: tabla `public.users` vinculada a `auth.users`
+- [x] Supabase: FK `orders.customer_id` → `users.id`
+- [x] Supabase: trigger `on_auth_user_created` → crea perfil automáticamente al registrarse
+- [x] Supabase: RLS habilitado en `users` y `orders` con policies por `auth.uid()`
+- [x] Frontend: `src/lib/supabaseClient.ts` — cliente singleton
+- [x] Frontend: `AuthContext.tsx` — `user`, `session`, `login()`, `register()`, `logout()`
+- [x] Frontend: `_app.tsx` — `AuthProvider` > `CartProvider` > `Layout`
+- [x] Frontend: páginas `/login` y `/register`
+- [x] Frontend: Navbar — botón 👤 condicional (Entrar / Salir según sesión)
+- [ ] Carrito: sincronización con servidor al hacer login
+- [ ] Página `/checkout` — formulario real con datos del usuario
 
 Arquitectura de tienda — decisión tomada
 - La tienda completa vive en `/products` (datos del API, filtros por categoría).

@@ -1,7 +1,9 @@
 /*NavBar.tsx*/
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import CartModal from './CartModal';
 import QuizModal from './QuizModal';
 
@@ -10,6 +12,13 @@ export default function Navbar() {
   const [cartOpen, setCartOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
   const { totalItems } = useCart();
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await logout();
+    router.push('/');
+  }
 
   return (
     <>
@@ -37,7 +46,15 @@ export default function Navbar() {
 
         {/* ICONOS Y BOTÓN (Escritorio y Móvil) */}
         <div className="hidden md:flex items-center space-x-4">
-          <button>👤</button>
+          {user ? (
+            <button onClick={handleLogout} className="text-sm font-semibold hover:text-brand-accent transition-colors" title={user.email}>
+              👤 Salir
+            </button>
+          ) : (
+            <Link href="/login" className="text-sm font-semibold hover:text-brand-accent transition-colors">
+              👤 Entrar
+            </Link>
+          )}
           <button
             onClick={() => setCartOpen(true)}
             className="relative"
@@ -66,7 +83,11 @@ export default function Navbar() {
           <Link href="/about" onClick={() => setIsOpen(false)}>POR QUÉ LUMA</Link>
           <Link href="/products" onClick={() => setIsOpen(false)}>TIENDA</Link>
           <div className="flex space-x-4 pt-2">
-            <button>👤 Cuenta</button>
+            {user ? (
+              <button onClick={handleLogout}>👤 Salir</button>
+            ) : (
+              <Link href="/login" onClick={() => setIsOpen(false)}>👤 Entrar</Link>
+            )}
             <button onClick={() => { setCartOpen(true); setIsOpen(false); }}>🛒 Carrito{totalItems > 0 && ` (${totalItems})`}</button>
           </div>
         </div>
