@@ -1,4 +1,5 @@
 /* src/components/ProductCard.tsx */
+import Image from 'next/image';
 import { useCart } from "../context/CartContext";
 
 interface ProductProps {
@@ -6,12 +7,13 @@ interface ProductProps {
   name: string;
   price: string;
   description: string;
-  color?: string; // Lo mantenemos por si lo usas en el modal
-  benefits: string[]; // Lo mantenemos en la interfaz para no romper tipos
+  imageUrl?: string;
+  color?: string;
+  benefits: string[];
   onDetails?: () => void;
 }
 
-export default function ProductCard({ id, name, price, description, color, benefits, onDetails }: ProductProps) {
+export default function ProductCard({ id, name, price, description, imageUrl, color, benefits, onDetails }: ProductProps) {
   const { add } = useCart();
 
   function handleAddToCart() {
@@ -23,12 +25,21 @@ export default function ProductCard({ id, name, price, description, color, benef
     <div className="bg-brand-surface rounded-3xl p-6 text-brand-primary flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300 group">
       <div className="flex-1">
 
-        {/* Imagen - Mantenemos el degradado sutil */}
-        <div className="bg-brand-bg aspect-square rounded-2xl flex items-center justify-center mb-5 relative overflow-hidden shadow-[inset_0_1px_4px_rgba(0,0,0,0.04)]">
-          <span className="text-brand-muted/30 font-semibold tracking-[0.3em] uppercase text-[10px]">
-            LUMA
-          </span>
-          <div className={`absolute inset-0 opacity-5 bg-gradient-to-br ${color?.replace('border-', 'from-') || 'from-transparent'}`} />
+        {/* Imagen del producto */}
+        <div className="aspect-square rounded-2xl mb-5 relative overflow-hidden bg-brand-bg shadow-[inset_0_1px_4px_rgba(0,0,0,0.04)]">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-brand-muted/30 font-semibold tracking-[0.3em] uppercase text-[10px]">LUMA</span>
+            </div>
+          )}
         </div>
 
         {/* Nombre y precio - Aquí aplicamos font-editorial para elevar el diseño */}

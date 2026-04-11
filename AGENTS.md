@@ -88,9 +88,12 @@ Flujo y responsabilidades
 
 Carrito — decisiones de diseño tomadas
 - UI: modal centrado (no drawer, no página separada).
-- Persistencia: `localStorage` con key `luma_cart`.
+- Persistencia: `localStorage` con key `luma_cart` (anónimo) y `luma_cart_<userId>` (usuario logueado) como fallback offline.
+- Persistencia en servidor: `PUT /cart` guarda el carrito en la tabla `cart` de la DB. `GET /cart` lo recupera al hacer login.
 - El campo `price` en `products.ts` es string; `ProductCard` lo parsea con `parseFloat(price.replace(/[^0-9.]/g, ''))` antes de llamar a `add()`.
-- `_app.tsx` estructura: `CartProvider` > `Layout` > `Component`.
+- `_app.tsx` estructura: `CartProvider` > `CartSync` > `Layout` > `Component`.
+- `CartSync`: al login (`null → userId`) carga el carrito desde el servidor (DB) y mergea con el carrito anónimo. Fallback a `localStorage` si el servidor no responde. `hydratedRef` evita escrituras en DB hasta que el carrito esté hidratado.
+- Cada cambio en `items` persiste en DB (fire-and-forget) + localStorage como backup offline.
 
 Estado de estilos (actualizado 2026-04-08)
 - Tailwind v4 → `globals.css` usa `@import "tailwindcss"` (NO directivas `@tailwind`)
@@ -117,24 +120,34 @@ Estado de implementación (Fase 1 — Tienda)
 - [x] `ProductSection` en home — muestra los 4 primeros productos (datos del API) + CTA "Ver todos →" a `/products`
 - [x] Navbar saneado: `/#por-que`; botón "Haz el Quiz" abre `QuizModal`
 - [x] `ProductDetailModal` — modal con descripción detallada, beneficios y botón "Añadir al carrito"
-- [ ] Página `/checkout` — formulario simulado
-- [ ] Página `/order-confirmation`
+- [x] Página `/checkout` — formulario con datos del usuario pre-rellenos + resumen + `POST /orders`
+- [x] Página `/order-confirmation` — pantalla de éxito con referencia de pedido
 
 Estado de implementación (Fase 2 — Cuentas y Auth)
 - [x] Backend: `AuthModule` + `JwtStrategy` (RS256, JWKS de Supabase) + `JwtAuthGuard`
 - [x] Backend: `UsersModule` + `UsersService` (`findOrCreate`, `updateProfile`)
 - [x] Backend: `GET /auth/me` + `PATCH /auth/profile` protegidos con `JwtAuthGuard`
+- [x] Backend: `OrdersModule` — `POST /orders` + `GET /orders/my` protegidos con `JwtAuthGuard`
+- [x] Backend: `CartModule` — `GET /cart` + `PUT /cart` protegidos con `JwtAuthGuard`
 - [x] Supabase: tabla `public.users` vinculada a `auth.users`
 - [x] Supabase: FK `orders.customer_id` → `users.id`
 - [x] Supabase: trigger `on_auth_user_created` → crea perfil automáticamente al registrarse
 - [x] Supabase: RLS habilitado en `users` y `orders` con policies por `auth.uid()`
 - [x] Frontend: `src/lib/supabaseClient.ts` — cliente singleton
 - [x] Frontend: `AuthContext.tsx` — `user`, `session`, `login()`, `register()`, `logout()`
-- [x] Frontend: `_app.tsx` — `AuthProvider` > `CartProvider` > `Layout`
+- [x] Frontend: `_app.tsx` — `AuthProvider` > `CartProvider` + `CartSync` > `Layout`
 - [x] Frontend: páginas `/login` y `/register`
 - [x] Frontend: Navbar — botón 👤 condicional (Entrar / Salir según sesión)
-- [ ] Carrito: sincronización con servidor al hacer login
-- [ ] Página `/checkout` — formulario real con datos del usuario
+- [x] Carrito: sincronización al login — carga desde DB (`GET /cart`), merge con carrito anónimo, fallback a localStorage
+- [x] Carrito: multi-dispositivo — cada cambio persiste en DB (`PUT /cart`) + localStorage como backup
+- [x] Página `/orders` — historial de pedidos del usuario con estado y detalle de items
+
+Pendiente (Fase 3 — Pre-producción)
+- [ ] Supabase: crear tabla `cart` (ver SQL abajo)
+- [ ] Supabase: RLS en tabla `cart` por `auth.uid()`
+- [ ] Configurar `FRONTEND_URL` real en backend `.env` para producción
+- [ ] Deploy: Vercel (frontend) + Railway o Fly.io (backend)
+- [ ] Dominio personalizado en Supabase Auth
 
 Arquitectura de tienda — decisión tomada
 - La tienda completa vive en `/products` (datos del API, filtros por categoría).

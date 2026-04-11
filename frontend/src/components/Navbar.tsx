@@ -1,97 +1,174 @@
 /*NavBar.tsx*/
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import CartModal from './CartModal';
 import QuizModal from './QuizModal';
+import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Cierra el dropdown si se hace clic fuera de él
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   async function handleLogout() {
+    setUserMenuOpen(false);
     await logout();
     router.push('/');
   }
 
+  // Etiqueta del botón: nombre del usuario o primeros caracteres del email
+  const userLabel = user?.user_metadata?.name
+    ? user.user_metadata.name.split(' ')[0]
+    : user?.email?.split('@')[0];
+
   return (
     <>
       <nav className="w-full bg-brand-bg border-b border-brand-surface fixed top-0 left-0 right-0 z-[100] shadow-sm">
-      <div className="flex items-center justify-between px-6 py-4">
-        
-        {/* LOGO */}
-        <div className="text-2xl font-bold text-brand-primary">
-            <Link href="/" className='cursor-pointer'>
-            Luma
-            </Link>
-        </div>
-        {/* BOTÓN HAMBURGUESA (Solo se ve en móvil) */}
-        <div className="md:hidden flex items-center">
-          <button onClick={() => setIsOpen(!isOpen)} className="text-2xl focus:outline-none">
-            {isOpen ? '✕' : '☰'} {/* Cambia el icono según el estado */}
-          </button>
-        </div>
+        <div className="flex items-center justify-between px-6 py-4">
 
-        {/* LINKS ESCRITORIO */}
-        <div className="hidden md:flex ml-auto mr-10 space-x-8 text-sm font-bold uppercase">
-          <Link href="/about">POR QUÉ LUMA</Link>
-          <Link href="/products">TIENDA</Link>
-        </div>
+          {/* LOGO */}
+          <div className="text-2xl font-bold text-brand-primary">
+            <Link href="/" className="cursor-pointer">Luma</Link>
+          </div>
 
-        {/* ICONOS Y BOTÓN (Escritorio y Móvil) */}
-        <div className="hidden md:flex items-center space-x-4">
-          {user ? (
-            <button onClick={handleLogout} className="text-sm font-semibold hover:text-brand-accent transition-colors" title={user.email}>
-              👤 Salir
+          {/* BOTÓN HAMBURGUESA (móvil) */}
+          <div className="md:hidden flex items-center">
+            <button onClick={() => setIsOpen(!isOpen)} className="text-2xl focus:outline-none">
+              {isOpen ? '✕' : '☰'}
             </button>
-          ) : (
-            <Link href="/login" className="text-sm font-semibold hover:text-brand-accent transition-colors">
-              👤 Entrar
-            </Link>
-          )}
-          <button
-            onClick={() => setCartOpen(true)}
-            className="relative"
-            aria-label="Abrir carrito"
-          >
-            🛒
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-brand-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setQuizOpen(true)}
-            className="bg-brand-accent text-white px-4 py-2 rounded-full text-xs font-bold hover:opacity-90 transition-opacity"
-          >
-            Haz el Quiz
-          </button>
-        </div>
-      </div>
+          </div>
 
-      {/* 3. MENÚ DESPLEGABLE MÓVIL */}
-      {/* Si isOpen es true, mostramos este div */}
-      {isOpen && (
-        <div className="md:hidden bg-brand-bg border-t border-brand-surface px-6 py-4 space-y-4 flex flex-col font-bold text-sm">
-          <Link href="/about" onClick={() => setIsOpen(false)}>POR QUÉ LUMA</Link>
-          <Link href="/products" onClick={() => setIsOpen(false)}>TIENDA</Link>
-          <div className="flex space-x-4 pt-2">
+          {/* LINKS ESCRITORIO */}
+          <div className="hidden md:flex ml-auto mr-10 space-x-8 text-sm font-bold uppercase">
+            <Link href="/about">POR QUÉ LUMA</Link>
+            <Link href="/products">TIENDA</Link>
+          </div>
+
+          {/* ACCIONES ESCRITORIO */}
+          <div className="hidden md:flex items-center space-x-4">
+
+            {/* Dropdown de usuario */}
             {user ? (
-              <button onClick={handleLogout}>👤 Salir</button>
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:text-brand-accent transition-colors"
+                  aria-haspopup="true"
+                  aria-expanded={userMenuOpen}
+                >
+                  <span className="w-7 h-7 rounded-full bg-brand-surface border border-brand-muted/30 flex items-center justify-center text-xs font-bold uppercase">
+                    {userLabel?.[0]}
+                  </span>
+                  <span>{userLabel}</span>
+                  <svg className={`w-3 h-3 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-brand-surface py-1 z-50">
+                    <div className="px-4 py-2 border-b border-brand-surface">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Cuenta</p>
+                      <p className="text-xs text-brand-primary truncate">{user.email}</p>
+                    </div>
+                    <Link
+                      href="/orders"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm text-brand-primary hover:bg-brand-surface transition-colors"
+                    >
+                      Mis pedidos
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <Link href="/login" onClick={() => setIsOpen(false)}>👤 Entrar</Link>
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-brand-primary hover:text-brand-accent transition-colors"
+              >
+                Acceder
+              </Link>
             )}
-            <button onClick={() => { setCartOpen(true); setIsOpen(false); }}>🛒 Carrito{totalItems > 0 && ` (${totalItems})`}</button>
+
+            {/* Carrito */}
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative p-2 rounded-full hover:bg-brand-surface/50 focus:outline-none focus:ring-2 focus:ring-brand-accent"
+              aria-label="Abrir carrito"
+            >
+              <ShoppingCartIcon className="w-6 h-6 text-brand-primary" aria-hidden="true" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-brand-accent text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setQuizOpen(true)}
+              className="bg-brand-accent text-white px-4 py-2 rounded-full text-xs font-bold hover:opacity-90 transition-opacity"
+            >
+              Haz el Quiz
+            </button>
           </div>
         </div>
-      )}
+
+        {/* MENÚ DESPLEGABLE MÓVIL */}
+        {isOpen && (
+          <div className="md:hidden bg-brand-bg border-t border-brand-surface px-6 py-4 space-y-4 flex flex-col font-bold text-sm">
+            <Link href="/about" onClick={() => setIsOpen(false)}>POR QUÉ LUMA</Link>
+            <Link href="/products" onClick={() => setIsOpen(false)}>TIENDA</Link>
+            <div className="border-t border-brand-surface pt-4 space-y-3">
+              {user ? (
+                <>
+                  <p className="text-[10px] uppercase tracking-widest text-brand-muted">{user.email}</p>
+                  <Link href="/orders" onClick={() => setIsOpen(false)} className="block">Mis pedidos</Link>
+                  <button onClick={handleLogout} className="text-red-500">Cerrar sesión</button>
+                </>
+              ) : (
+                <Link href="/login" onClick={() => setIsOpen(false)}>Acceder</Link>
+              )}
+              <button
+                onClick={() => { setCartOpen(true); setIsOpen(false); }}
+                className="relative flex items-center gap-2 focus:outline-none"
+                aria-label="Abrir carrito"
+              >
+                <ShoppingCartIcon className="w-5 h-5 text-brand-primary" aria-hidden="true" />
+                <span>Carrito</span>
+                {totalItems > 0 && (
+                  <span className="ml-1 bg-brand-accent text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />

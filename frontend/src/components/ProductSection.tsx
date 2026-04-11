@@ -4,6 +4,7 @@ import Link from 'next/link';
 import ProductCard from './ProductCard';
 import ProductDetailModal from './ProductDetailModal';
 import { useProducts, ApiProduct } from '../hooks/useProducts';
+import { getProductImage } from '../lib/productImages';
 
 function normalizePrice(price: string | number): string {
   if (typeof price === 'string') return price.includes('€') ? price : `${price}€`;
@@ -59,6 +60,7 @@ export default function ProductSection() {
                 name={product.name}
                 price={normalizePrice(product.price)}
                 description={product.description}
+                imageUrl={getProductImage(product.category)}
                 benefits={normalizeBenefits(product.benefits)}
                 onDetails={() => setSelectedProduct(product)}
               />
@@ -81,14 +83,17 @@ export default function ProductSection() {
       </div>
 
       {/* AQUÍ ESTABA EL ERROR: Eliminamos 'price' y 'color' del objeto product */}
-      {selectedProduct && (
-        <ProductDetailModal
+      {selectedProduct && (        <ProductDetailModal
           product={{
             id: String(selectedProduct.id),
             name: selectedProduct.name,
             description: selectedProduct.description,
             benefits: normalizeBenefits(selectedProduct.benefits),
             category: selectedProduct.category,
+            imageUrl: getProductImage(selectedProduct.category),
+            price: typeof selectedProduct.price === 'string'
+              ? parseFloat(selectedProduct.price.replace(/[^0-9.]/g, ''))
+              : Number(selectedProduct.price),
           }}
           onClose={() => setSelectedProduct(null)}
         />

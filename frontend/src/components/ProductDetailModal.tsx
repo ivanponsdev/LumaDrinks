@@ -1,5 +1,6 @@
 /* ProductDetailModal.tsx */
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useCart } from '../context/CartContext';
 
 interface ProductDetailProps {
@@ -9,6 +10,8 @@ interface ProductDetailProps {
     description: string;
     category: string;
     benefits: string[];
+    price: number; // precio real del API (precio del pack completo de 30)
+    imageUrl?: string;
   };
   onClose: () => void;
 }
@@ -20,10 +23,12 @@ export default function ProductDetailModal({ product, onClose }: ProductDetailPr
   const [packSize, setPackSize] = useState<10 | 30>(30); // Por defecto el hábito mensual
   const [isSubscription, setIsSubscription] = useState(true); // Suscripción por defecto
 
-  // Lógica de precios (Basada en un precio base por unidad que baja en packs grandes)
-  const pricePerUnit = packSize === 30 ? 2.5 : 3.0; 
-  const baseTotal = packSize * pricePerUnit;
-  const finalPrice = isSubscription ? baseTotal * 0.85 : baseTotal; // 15% de ahorro en suscripción
+  // Lógica de precios basada en el precio real del API
+  // product.price = precio del pack de 30 (compra única). Pack 10 = proporcional.
+  const basePrice30 = product.price;
+  const basePrice10 = Math.round((product.price / 30) * 10 * 100) / 100;
+  const baseTotal = packSize === 30 ? basePrice30 : basePrice10;
+  const finalPrice = isSubscription ? Math.round(baseTotal * 0.85 * 100) / 100 : baseTotal; // 15% dto suscripción
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -46,10 +51,20 @@ export default function ProductDetailModal({ product, onClose }: ProductDetailPr
 
       <div className="relative bg-brand-bg text-brand-primary rounded-[2.5rem] w-full max-w-xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col md:flex-row max-h-[90vh]">
         
-        {/* Lado Izquierdo: Visual (Opcional en desktop) */}
-        <div className="bg-brand-surface w-full md:w-1/3 flex items-center justify-center p-8 relative">
-          <div className="text-7xl">🍾</div>
-          <span className="absolute bottom-6 text-[10px] font-bold tracking-widest text-brand-muted uppercase opacity-50">
+        {/* Lado Izquierdo: Imagen del producto */}
+        <div className="bg-brand-surface w-full md:w-1/3 flex items-center justify-center relative overflow-hidden rounded-l-[2.5rem]">
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+          ) : (
+            <span className="text-brand-muted/30 font-bold tracking-[0.3em] uppercase text-sm">LUMA</span>
+          )}
+          <span className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-bold tracking-widest text-white/70 uppercase drop-shadow">
             Pack {packSize} días
           </span>
         </div>

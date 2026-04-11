@@ -17,12 +17,27 @@ type CartAction =
   | { type: 'REMOVE'; payload: { id: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR' }
-  | { type: 'HYDRATE'; payload: CartItem[] };
+  | { type: 'HYDRATE'; payload: CartItem[] }
+  | { type: 'MERGE'; payload: CartItem[] };
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'HYDRATE':
       return { items: action.payload };
+
+    case 'MERGE': {
+      // Merge saved user cart into current cart (anonymous + user items, no duplicates)
+      const merged = [...state.items];
+      for (const incoming of action.payload) {
+        const idx = merged.findIndex((i) => i.id === incoming.id);
+        if (idx >= 0) {
+          merged[idx] = { ...merged[idx], quantity: merged[idx].quantity + incoming.quantity };
+        } else {
+          merged.push(incoming);
+        }
+      }
+      return { items: merged };
+    }
 
     case 'ADD': {
       const existing = state.items.find((i) => i.id === action.payload.id);
@@ -68,6 +83,7 @@ interface CartContextValue {
   remove: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clear: () => void;
+  merge: (items: CartItem[]) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -109,6 +125,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity: (id, quantity) =>
           dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } }),
         clear: () => dispatch({ type: 'CLEAR' }),
+        merge: (items) => dispatch({ type: 'MERGE', payload: items }),
       }}
     >
       {children}

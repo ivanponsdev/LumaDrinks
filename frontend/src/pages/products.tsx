@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useProducts, ApiProduct } from '../hooks/useProducts';
 import ProductCard from '../components/ProductCard';
 import ProductDetailModal from '../components/ProductDetailModal';
+import { getProductImage } from '../lib/productImages';
 
 const ALL = 'ALL';
 
@@ -75,6 +76,7 @@ export default function ProductsPage() {
                 name={product.name}
                 price={normalizePrice(product.price)}
                 description={product.description}
+                imageUrl={getProductImage(product.category)}
                 color="" 
                 benefits={normalizeBenefits(product.benefits)}
                 onDetails={() => setSelectedProduct(product)}
@@ -90,9 +92,12 @@ export default function ProductsPage() {
             id: String(selectedProduct.id),
             name: selectedProduct.name,
             description: selectedProduct.description,
-            // Eliminamos 'price' y 'color' porque el Modal ya no los usa
             benefits: normalizeBenefits(selectedProduct.benefits),
             category: selectedProduct.category,
+            imageUrl: getProductImage(selectedProduct.category),
+            price: typeof selectedProduct.price === 'string'
+              ? parseFloat(selectedProduct.price.replace(/[^0-9.]/g, ''))
+              : Number(selectedProduct.price),
           }}
           onClose={() => setSelectedProduct(null)}
         />

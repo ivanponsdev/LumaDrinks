@@ -32,20 +32,14 @@ export default function Hero() {
         </div>
 
         {/* 2. COLUMNA DERECHA: Imagen del Producto */}
-        <div className="relative aspect-square bg-brand-surface rounded-3xl overflow-hidden flex items-center justify-center border border-brand-surface shadow-sm">
-          <div className="text-center p-10">
-            <div className="text-9xl mb-4 animate-pulse">🍾</div>
-            <p className="text-sm text-brand-muted font-mono">
-              [ Aquí irá la imagen de la botella ]<br />
-            </p>
-          </div>
-          {/* <Image 
-            src="/images/neurofuel-hero.jpg" 
-            alt="Botella de Luma sobre piedra"
+        <div className="relative aspect-square bg-brand-surface rounded-3xl overflow-hidden border border-brand-surface shadow-sm">
+          <Image 
+            src="/images/LumaHero.png" 
+            alt="Botella de Luma"
             fill
             className="object-cover"
             priority 
-          /> */}
+          />
         </div>
       </div>
 

@@ -89,6 +89,8 @@ Supabase
 | POST | `/auth/login` | público | Devuelve sesión JWT |
 | GET | `/auth/me` | JWT | Perfil del usuario |
 | PATCH | `/auth/profile` | JWT | Actualiza nombre |
+| POST | `/orders` | JWT | Crea un pedido con items del carrito |
+| GET | `/orders/my` | JWT | Lista pedidos del usuario autenticado |
 
 ---
 
@@ -179,13 +181,20 @@ frontend/src/
 
 ---
 
-## Pendiente para producción
+## Estado de implementación
 
-- [ ] Página `/checkout` — formulario con datos del pedido
-- [ ] Página `/order-confirmation`
-- [ ] Sincronización del carrito con el servidor al hacer login
+### Completado
+- [x] Página `/checkout` — formulario con email/nombre pre-rellenos, resumen y `POST /orders`
+- [x] Página `/order-confirmation` — pantalla de éxito con referencia de pedido
+- [x] `CartSync` — merge de carrito anónimo con carrito de usuario al hacer login (localStorage por usuario `luma_cart_<userId>`)
+- [x] `OrdersModule` — `POST /orders` + `GET /orders/my` protegidos con `JwtAuthGuard`
+- [x] Migración completa de estilos a tokens `brand-*` (identidad Luma aplicada a todos los componentes)
+
+### Pendiente para producción
+- [ ] Página `/orders` — historial de pedidos del usuario (backend `GET /orders/my` ya existe)
+- [ ] Carrito multi-dispositivo — persistir carrito en DB (actualmente solo en `localStorage`)
+- [ ] Activar confirmación de email en Supabase (Authentication → Email)
 - [ ] Configurar `FRONTEND_URL` en backend para el dominio de producción
 - [ ] Habilitar HTTPS (Vercel/Railway/Fly.io lo hacen automáticamente)
 - [ ] Revisar límites de rate limiting según tráfico esperado
-- [ ] Activar confirmación de email en Supabase (Authentication → Email)
 - [ ] Configurar dominio personalizado en Supabase Auth
