@@ -159,3 +159,23 @@ Arquitectura de tienda — decisión tomada
 
 Accesibilidad y estilos
 - Usa utilidades de Tailwind para consistencia. Asegura contraste, foco visible y `aria-*` en elementos interactivos.
+
+---
+
+## Cambios recientes (2026-04-13 — Admin CRUD + redirección)
+
+- **Admin redirect on login**: tras un login exitoso, si `role === 'admin'` la app redirige automáticamente a `/admin/products` (a menos que haya un query param `?redirect=`).
+- **`AuthContext` expone `role`**: al cargar la sesión (y al hacer login) se llama a `GET /auth/me` para obtener el rol del usuario desde `public.users`. El rol se almacena en contexto y se limpia al logout.
+- **`users.service.ts`**: `UserProfile` incluye ahora el campo `role`; todas las queries SELECT lo incluyen.
+- **Backend: CRUD de productos**: `ProductsService` tiene `findOne`, `update` y `remove`. `ProductsController` expone `GET /:id` (público), `PATCH /:id` y `DELETE /:id` (admin). El POST también está protegido. `ProductsModule` importa `AuthModule` y registra `AdminRoleGuard`.
+- **`update-product.dto.ts`**: nuevo DTO con todos los campos opcionales y validación con `class-validator`.
+- **`AdminLayout.tsx`**: layout compartido para todas las páginas admin. Sidebar con nav (Productos, Analítica), enlace a la tienda pública y botón de logout. No incluye el Navbar/Footer público (el `_app.tsx` ya excluía el Layout global para rutas `/admin/*`).
+- **`/admin/products`**: nueva página con tabla de productos + modal para crear/editar y confirmación de borrado. Ruta inicial del admin tras login.
+- **`/admin/dashboard`**: ahora usa `AdminLayout` (sustituye el wrapper `min-h-screen` y el header custom).
+- **`api.ts`**: añadidas funciones `adminCreateProduct`, `adminUpdateProduct`, `adminDeleteProduct`.
+
+Flujo admin completo:
+1. Admin hace login → `AuthContext.login()` llama `GET /auth/me` → obtiene `role='admin'`
+2. `login.tsx` detecta el rol y redirige a `/admin/products`  
+3. Sidebar de `AdminLayout` permite navegar entre Productos y Analítica
+4. Botón "Ver tienda" vuelve a la tienda pública sin cerrar sesión

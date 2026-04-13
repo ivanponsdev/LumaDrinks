@@ -35,13 +35,19 @@ export default function LoginPage() {
 
     setServerError(null);
     setLoading(true);
-    // Capa 2: NestJS valida el DTO y devuelve errores si no pasa
-    const { error } = await login(email, password);
+    const { error, role } = await login(email, password);
     if (error) {
       setServerError(error);
     } else {
-      const redirect = (router.query.redirect as string) || '/';
-      router.push(redirect);
+      // Admin → panel de administración; usuario normal → redirect o home
+      const redirect = router.query.redirect as string | undefined;
+      if (redirect) {
+        router.push(redirect);
+      } else if (role === 'admin') {
+        router.push('/admin/products');
+      } else {
+        router.push('/');
+      }
     }
     setLoading(false);
   }

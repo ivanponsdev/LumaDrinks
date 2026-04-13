@@ -4,6 +4,7 @@ export interface UserProfile {
   id: string;
   email: string;
   name: string | null;
+  role: string;
   created_at: string;
 }
 
@@ -13,7 +14,7 @@ export class UsersService {
 
   async findById(id: string): Promise<UserProfile | null> {
     const result = await this.db.query(
-      'SELECT id, email, name, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, role, created_at FROM users WHERE id = $1',
       [id],
     );
     return result.rows[0] ?? null;
@@ -26,7 +27,7 @@ export class UsersService {
     const result = await this.db.query(
       `INSERT INTO users (id, email) VALUES ($1, $2)
        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
-       RETURNING id, email, name, created_at`,
+       RETURNING id, email, name, role, created_at`,
       [supabaseUser.id, supabaseUser.email],
     );
     return result.rows[0];
@@ -36,7 +37,7 @@ export class UsersService {
     const result = await this.db.query(
       `UPDATE users SET name = COALESCE($2, name)
        WHERE id = $1
-       RETURNING id, email, name, created_at`,
+       RETURNING id, email, name, role, created_at`,
       [id, data.name ?? null],
     );
     return result.rows[0];

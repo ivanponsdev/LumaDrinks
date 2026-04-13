@@ -1,6 +1,7 @@
 /* pages/admin/dashboard.tsx — Admin Dashboard */
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import AdminLayout from '../../components/AdminLayout';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, Legend,
@@ -101,16 +102,12 @@ export default function AdminDashboard() {
     : '0';
 
   return (
-    <div className="min-h-screen bg-brand-bg">
+    <AdminLayout>
       {/* Header */}
       <div className="bg-white border-b border-brand-surface px-8 py-5 flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Panel de administración</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Analítica de negocio</p>
           <h1 className="text-2xl font-editorial text-brand-primary">Dashboard Luma</h1>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-brand-muted">Sesión como</p>
-          <p className="text-sm font-semibold text-brand-primary">{user?.email}</p>
         </div>
       </div>
 
@@ -420,6 +417,6 @@ export default function AdminDashboard() {
         </div>
 
       </div>
-    </div>
+    </AdminLayout>
   );
 }

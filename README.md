@@ -92,6 +92,20 @@ Supabase
 | POST | `/orders` | JWT | Crea un pedido con items del carrito |
 | GET | `/orders/my` | JWT | Lista pedidos del usuario autenticado |
 
+### Admin endpoints (dashboard)
+
+El proyecto incluye un panel de administración para métricas y análisis. Rutas del backend protegidas por JWT + role `admin`:
+
+- `GET /admin/stats` — devuelve KPIs (revenue, pedidos, top productos, ventas diarias), métricas de clientes (registrados, convertidos, sin compra, días hasta primera compra) y `recentNonBuyers` (lista de emails de usuarios sin compra, solo accesible para admins).
+- `GET /admin/orders` — lista paginada de pedidos (incluye `customer_email`, `utm_*`, `total_paid`, `status`).
+
+Frontend: `frontend/src/pages/admin/dashboard.tsx` muestra las gráficas y tablas; la ruta pública es `/admin/dashboard` y exige login de admin. Si el usuario no está autenticado se redirige a `/login?redirect=/admin/dashboard`.
+
+### Notas operativas
+
+- Se actualizó `backend/src/auth/jwt.strategy.ts` para aceptar tokens firmados con `ES256` (coincide con la configuración JWKS de Supabase). Si cambias el proveedor de auth, revisa el algoritmo en la estrategia.
+- Para probar el dashboard localmente: arranca backend y frontend y autentica con un usuario que tenga `role='admin'` en `public.users`.
+
 ---
 
 ## Base de datos (Supabase)

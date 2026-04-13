@@ -156,3 +156,29 @@ export const getAdminOrders = async (
   });
   return response.data;
 };
+
+// --- Admin: gestión de productos ---
+
+export const adminCreateProduct = async (data: any, accessToken: string): Promise<any> => {
+  const response = await api.post('/products', data, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.data;
+};
+
+export const adminUpdateProduct = async (
+  id: string,
+  data: any,
+  accessToken: string,
+): Promise<any> => {
+  const response = await api.patch(`/products/${id}`, data, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.data;
+};
+
+export const adminDeleteProduct = async (id: string, accessToken: string): Promise<void> => {
+  await api.delete(`/products/${id}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+};
