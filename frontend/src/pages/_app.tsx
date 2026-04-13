@@ -67,14 +67,19 @@ function CartSync() {
   return null;
 }
 
-export default function MyApp({ Component, pageProps }) {
+export default function MyApp({ Component, pageProps, router }) {
+  const isAdmin = router.pathname.startsWith('/admin');
   return (
     <AuthProvider>
       <CartProvider>
         <CartSync />
-        <Layout>
+        {isAdmin ? (
           <Component {...pageProps} />
-        </Layout>
+        ) : (
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        )}
       </CartProvider>
     </AuthProvider>
   );

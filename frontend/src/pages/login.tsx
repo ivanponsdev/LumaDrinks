@@ -40,7 +40,8 @@ export default function LoginPage() {
     if (error) {
       setServerError(error);
     } else {
-      router.push('/');
+      const redirect = (router.query.redirect as string) || '/';
+      router.push(redirect);
     }
     setLoading(false);
   }

@@ -69,3 +69,90 @@ export const saveServerCart = async (
     { headers: { Authorization: `Bearer ${accessToken}` } },
   );
 };
+
+// --- Admin ---
+
+export interface AdminSummary {
+  total_revenue: number;
+  avg_order: number;
+  total_orders: number;
+  last_7d: number;
+  last_30d: number;
+  revenue_30d: number;
+}
+
+export interface AdminTopProduct {
+  name: string;
+  orders: number;
+  revenue: number;
+}
+
+export interface AdminBySource {
+  source: string;
+  orders: number;
+  revenue: number;
+}
+
+export interface AdminDailySale {
+  day: string;
+  orders: number;
+  revenue: number;
+}
+
+export interface AdminStatusBreakdown {
+  status: string;
+  count: number;
+}
+
+export interface AdminCustomerMetrics {
+  registered_count: number;
+  converted_count: number;
+  registered_no_orders_count: number;
+  avg_days_to_first_purchase: number;
+}
+
+export interface AdminNonBuyer {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
+export interface AdminStats {
+  summary: AdminSummary;
+  topProducts: AdminTopProduct[];
+  bySource: AdminBySource[];
+  dailySales: AdminDailySale[];
+  statusBreakdown: AdminStatusBreakdown[];
+  customerMetrics: AdminCustomerMetrics;
+  recentNonBuyers: AdminNonBuyer[];
+}
+
+export interface AdminOrder {
+  id: string;
+  total_paid: number;
+  status: string;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  created_at: string;
+  customer_email: string;
+  items: OrderItem[];
+}
+
+export const getAdminStats = async (accessToken: string): Promise<AdminStats> => {
+  const response = await api.get('/admin/stats', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.data;
+};
+
+export const getAdminOrders = async (
+  accessToken: string,
+  limit = 50,
+  offset = 0,
+): Promise<AdminOrder[]> => {
+  const response = await api.get(`/admin/orders?limit=${limit}&offset=${offset}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.data;
+};

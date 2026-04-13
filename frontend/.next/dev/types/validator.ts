@@ -44,6 +44,15 @@ type PagesPageConfig = {
   type __Unused = __Check
 }
 
+// Validate ../../../src/pages/admin/dashboard.tsx
+{
+  type __IsExpected<Specific extends PagesPageConfig> = Specific
+  const handler = {} as typeof import("../../../src/pages/admin/dashboard.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../src/pages/checkout.tsx
 {
   type __IsExpected<Specific extends PagesPageConfig> = Specific
