@@ -207,6 +207,55 @@ Pendiente (Fase 4 — Pre-producción)
 - [ ] Deploy: Vercel (frontend) + Railway o Fly.io (backend)
 - [ ] Dominio personalizado en Supabase Auth
 
+---
+
+## Testing (Fase 5 — implementada 2026-04-13)
+
+### Stack de tests
+- **Backend (Jest)**: `npm run test` — unit tests; `npm run test:e2e` — guards e2e con Supertest
+- **Frontend (Vitest)**: `npm run test` — unit tests puros (sin navegador, ~1 s)
+- **Frontend E2E (Playwright)**: `npm run test:e2e` — tests de flujo completo contra Chrome real
+
+### Archivos creados
+| Archivo | Qué testea |
+|---------|-----------|
+| `backend/src/payments/payments.service.spec.ts` | `simulate()`: last4, no fullcard, no CVC; `findAll()`: paginación |
+| `backend/src/orders/orders.service.spec.ts` | `create()`: SQL correcto, status inicial; `findByCustomer()`: isolation por customer_id |
+| `backend/src/admin/admin-role.guard.spec.ts` | permite admin, rechaza customer, rechaza sin userId |
+| `backend/src/products/products.service.spec.ts` | findAll, findOne, null si no existe *(reescrito)* |
+| `backend/src/products/products.controller.spec.ts` | delega a service, guards mockeados con `overrideGuard()` *(reescrito)* |
+| `backend/test/auth-guards.e2e-spec.ts` | todas las rutas protegidas devuelven 401 sin token |
+| `frontend/src/context/CartContext.test.ts` | reducer: ADD, REMOVE, UPDATE_QUANTITY, CLEAR, HYDRATE, MERGE, totales |
+| `frontend/src/components/PaymentForm.test.ts` | `validate()`: casos válidos/inválidos; `formatCardNumber()` y `formatExpiry()` |
+| `frontend/e2e/auth.spec.ts` | páginas login/register cargan, credenciales erróneas muestran error |
+| `frontend/e2e/cart.spec.ts` | home carga, productos carga, checkout sin auth |
+| `frontend/e2e/admin.spec.ts` | rutas admin redirigen si no hay sesión |
+
+### Convenciones de tests
+- Backend: mocks de `DATABASE_POOL` con `jest.fn()`, nunca se toca la DB real
+- `uuid` se mockea en payments.service.spec.ts por incompatibilidad ESM con Jest
+- Guards NestJS se sobreescriben con `.overrideGuard().useValue()` en controller specs
+- Frontend unit: funciones puras exportadas (`cartReducer`, `validate`, `formatCardNumber`, `formatExpiry`)
+- Frontend E2E: usan `baseURL: http://localhost:3000`; `webServer` arranca el frontend automáticamente
+- Playwright: `reuseExistingServer: true` para no reiniciar si ya está corriendo
+
+### Cómo ejecutar
+```bash
+# Backend — todos los tests unitarios
+cd backend && npm run test
+
+# Backend — e2e guards (sin DB real)
+cd backend && npm run test:e2e
+
+# Frontend — unit tests (vitest, ~1 s)
+cd frontend && npm run test
+
+# Frontend — E2E (necesita backend corriendo en :3001)
+cd frontend && npm run test:e2e          # headless
+cd frontend && npm run test:e2e:headed   # con ventana visible
+cd frontend && npm run test:e2e:ui       # interfaz gráfica Playwright
+```
+
 Arquitectura de tienda — decisión tomada
 - La tienda completa vive en `/products` (datos del API, filtros por categoría).
 - El home solo muestra un bloque "PRODUCTOS DESTACADOS" con los 4 primeros productos del API como preview, con CTA a `/products`.

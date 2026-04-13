@@ -20,7 +20,7 @@ type CartAction =
   | { type: 'HYDRATE'; payload: CartItem[] }
   | { type: 'MERGE'; payload: CartItem[] };
 
-function cartReducer(state: CartState, action: CartAction): CartState {
+export function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'HYDRATE':
       return { items: action.payload };
