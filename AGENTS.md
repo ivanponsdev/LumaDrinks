@@ -142,7 +142,65 @@ Estado de implementación (Fase 2 — Cuentas y Auth)
 - [x] Carrito: multi-dispositivo — cada cambio persiste en DB (`PUT /cart`) + localStorage como backup
 - [x] Página `/orders` — historial de pedidos del usuario con estado y detalle de items
 
-Pendiente (Fase 3 — Pre-producción)
+---
+
+## Cambios recientes (2026-04-14 — Simulación de pago)
+
+### Flujo de checkout actualizado (2 pasos)
+1. **Paso 1 — Datos de envío**: nombre, email (readonly), dirección. Al continuar → `POST /orders` → guarda el `orderId` en estado local.
+2. **Paso 2 — Pago**: `PaymentForm` con tarjeta prefilled (`4242 4242 4242 4242`, `12/34`, `123`). Al pagar → `POST /payments/simulate` → redirect a `/order-confirmation?orderId=&paymentId=`.
+- Indicador de progreso visual de 2 pasos en la cabecera.
+- El carrito se limpia solo después del pago exitoso.
+
+### Backend — PaymentsModule
+- `backend/src/payments/dto/simulate-payment.dto.ts`: validación con `class-validator` — 16 dígitos, formato MM/AA, CVC 3-4 dígitos.
+- `backend/src/payments/payments.service.ts`: simulación siempre exitosa (`status: 'succeeded'`), solo guarda `last4` (nunca número completo ni CVC), inserta en `public.payments`.
+- `backend/src/payments/payments.controller.ts`: `POST /payments/simulate` (JwtAuthGuard), `GET /payments` (JwtAuthGuard + AdminRoleGuard, paginado).
+- `backend/src/payments/payments.module.ts`: imports `AuthModule`, providers `[PaymentsService, AdminRoleGuard]`.
+- `PaymentsModule` registrado en `app.module.ts`.
+
+### Frontend — componentes y páginas
+- `frontend/src/components/PaymentForm.tsx`: formulario con banner "Pago simulado", validación inline en tiempo real, delay de 1.5 s, spinner de procesando, prefilled con datos demo.
+- `frontend/src/pages/checkout.tsx`: refactorizado a 2 pasos (`details` → `payment`), paso 1 crea el pedido, paso 2 procesa el pago.
+- `frontend/src/pages/order-confirmation.tsx`: muestra `orderId` + `paymentId` si está presente.
+- `frontend/src/pages/admin/payments.tsx`: tabla admin de todos los pagos (UUID, order_id, importe, estado, tarjeta ofuscada, fecha).
+- `frontend/src/components/AdminLayout.tsx`: nav item "Pagos" añadido entre Productos y Analítica.
+- `frontend/src/services/api.ts`: `simulatePayment()` y `getAdminPayments()` añadidos.
+
+### SQL para tabla `payments` (ejecutar en Supabase)
+```sql
+create table public.payments (
+  id uuid primary key,
+  order_id uuid,
+  amount numeric,
+  status text,
+  provider text default 'simulator',
+  last4 text,
+  metadata jsonb,
+  created_at timestamptz default now(),
+  processed_at timestamptz
+);
+-- RLS
+alter table public.payments enable row level security;
+create policy "Admin full access" on public.payments
+  for all using (
+    exists (
+      select 1 from public.users where id = auth.uid() and role = 'admin'
+    )
+  );
+```
+
+Estado de implementación (Fase 3 — Pago simulado)
+- [x] `PaymentsModule` backend (DTO, service, controller, module)
+- [x] `POST /payments/simulate` (JwtAuthGuard) + `GET /payments` (AdminRoleGuard)
+- [x] `PaymentForm.tsx` — formulario con validación en tiempo real y delay simulado
+- [x] `checkout.tsx` — flujo de 2 pasos con indicador de progreso
+- [x] `order-confirmation.tsx` — muestra `orderId` + `paymentId`
+- [x] `admin/payments.tsx` — tabla de pagos para admin
+- [x] `AdminLayout.tsx` — nav item "Pagos"
+- [ ] SQL: crear tabla `payments` en Supabase (ver SQL arriba)
+
+Pendiente (Fase 4 — Pre-producción)
 - [ ] Supabase: crear tabla `cart` (ver SQL abajo)
 - [ ] Supabase: RLS en tabla `cart` por `auth.uid()`
 - [ ] Configurar `FRONTEND_URL` real en backend `.env` para producción

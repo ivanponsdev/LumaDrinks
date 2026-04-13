@@ -21,14 +21,23 @@ export interface OrderItem {
   quantity: number;
 }
 
+export interface ShippingAddress {
+  street: string;
+  floor?: string;
+  city: string;
+  postalCode: string;
+  province: string;
+}
+
 export const createOrder = async (
   items: OrderItem[],
   total: number,
   accessToken: string,
+  shippingAddress: ShippingAddress,
 ) => {
   const response = await api.post(
     '/orders',
-    { items, total },
+    { items, total, shippingAddress },
     { headers: { Authorization: `Bearer ${accessToken}` } },
   );
   return response.data;
@@ -38,7 +47,7 @@ export interface Order {
   id: string;
   customer_id: string;
   items: OrderItem[];
-  total: number;
+  total_paid: number;
   status: string;
   created_at: string;
 }
@@ -181,4 +190,54 @@ export const adminDeleteProduct = async (id: string, accessToken: string): Promi
   await api.delete(`/products/${id}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+};
+
+// --- Payments ---
+
+export interface SimulatePaymentDto {
+  cardNumber: string;
+  expiry: string;
+  cvc: string;
+  cardholderName: string;
+  amount: number;
+  orderId?: string;
+}
+
+export interface PaymentResult {
+  paymentId: string;
+  status: string;
+  last4: string;
+  processedAt: string;
+}
+
+export const simulatePayment = async (
+  data: SimulatePaymentDto,
+  accessToken: string,
+): Promise<PaymentResult> => {
+  const response = await api.post('/payments/simulate', data, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.data;
+};
+
+export interface AdminPayment {
+  id: string;
+  order_id: string | null;
+  amount: number;
+  status: string;
+  last4: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  processed_at: string;
+}
+
+export const getAdminPayments = async (
+  accessToken: string,
+  limit = 50,
+  offset = 0,
+): Promise<AdminPayment[]> => {
+  const response = await api.get(`/payments?limit=${limit}&offset=${offset}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return response.data;
 };

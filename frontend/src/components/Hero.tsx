@@ -1,11 +1,14 @@
 /*Hero.tsx*/
 import { useState } from 'react';
 import Image from 'next/image';
-import QuizModal from './QuizModal'; // Asegúrate de que la ruta sea correcta
+import QuizModal from './QuizModal';
+import ShippingModal from './ShippingModal';
+import SubscriptionModal from './SubscriptionModal';
 
 export default function Hero() {
-  // Estado para controlar si el modal está abierto o cerrado
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isShippingOpen, setIsShippingOpen] = useState(false);
+  const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
 
   return (
     <section className="bg-brand-bg text-brand-primary min-h-[90vh] flex items-center px-10 md:px-20 py-20">
@@ -29,6 +32,25 @@ export default function Hero() {
               Haz el Quiz de Enfoque
             </button>
           </div>
+
+          {/* Info badges */}
+          <div className="flex flex-wrap gap-3 pt-2">
+            <button
+              onClick={() => setIsShippingOpen(true)}
+              className="flex items-center gap-2 border border-brand-surface bg-brand-surface hover:bg-brand-muted/20 text-brand-primary px-4 py-2 rounded-full text-sm font-medium transition-colors"
+            >
+              <span>🚚</span>
+              <span>Envío gratis</span>
+            </button>
+            <button
+              onClick={() => setIsSubscriptionOpen(true)}
+              className="flex items-center gap-2 border border-brand-surface bg-brand-surface hover:bg-brand-muted/20 text-brand-primary px-4 py-2 rounded-full text-sm font-medium transition-colors"
+            >
+              <span>📦</span>
+              <span>Pack de suscripción</span>
+              <span className="text-brand-accent text-xs font-bold">Saber más →</span>
+            </button>
+          </div>
         </div>
 
         {/* 2. COLUMNA DERECHA: Imagen del Producto */}
@@ -43,12 +65,10 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* --- INTEGRACIÓN DEL QUIZ --- */}
-      {/* El componente QuizModal solo se renderizará cuando isQuizOpen sea true */}
-      <QuizModal 
-        isOpen={isQuizOpen} 
-        onClose={() => setIsQuizOpen(false)} 
-      />
+      {/* --- MODALS --- */}
+      <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
+      <ShippingModal isOpen={isShippingOpen} onClose={() => setIsShippingOpen(false)} />
+      <SubscriptionModal isOpen={isSubscriptionOpen} onClose={() => setIsSubscriptionOpen(false)} />
     </section>
   );
 }

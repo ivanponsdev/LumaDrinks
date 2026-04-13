@@ -5,7 +5,7 @@ export interface Order {
   id: string;
   customer_id: string;
   items: unknown;
-  total: number;
+  total_paid: number;
   status: string;
   created_at: string;
 }
@@ -16,10 +16,10 @@ export class OrdersService {
 
   async create(customerId: string, dto: CreateOrderDto): Promise<Order> {
     const result = await this.db.query(
-      `INSERT INTO orders (customer_id, items, total, status)
-       VALUES ($1, $2::jsonb, $3, 'pending')
+      `INSERT INTO orders (customer_id, items, products_snapshot, total_paid, status, shipping_address)
+       VALUES ($1, $2::jsonb, $2::jsonb, $3, 'Pendiente', $4::jsonb)
        RETURNING *`,
-      [customerId, JSON.stringify(dto.items), dto.total],
+      [customerId, JSON.stringify(dto.items), dto.total, JSON.stringify(dto.shippingAddress)],
     );
     return result.rows[0];
   }

@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function OrderConfirmationPage() {
   const router = useRouter();
-  const { orderId } = router.query;
+  const { orderId, paymentId } = router.query;
 
   return (
     <div className="min-h-screen bg-brand-bg flex items-center justify-center px-4">
@@ -28,11 +28,18 @@ export default function OrderConfirmationPage() {
         </p>
 
         {orderId && (
-          <p className="text-sm text-brand-muted mb-8">
-            Referencia:{' '}
+          <p className="text-sm text-brand-muted mb-1">
+            Pedido:{' '}
             <span className="font-mono text-brand-primary">{orderId}</span>
           </p>
         )}
+        {paymentId && (
+          <p className="text-sm text-brand-muted mb-8">
+            Pago:{' '}
+            <span className="font-mono text-brand-primary">{paymentId}</span>
+          </p>
+        )}
+        {!paymentId && <div className="mb-8" />}
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
@@ -52,3 +59,4 @@ export default function OrderConfirmationPage() {
     </div>
   );
 }
+

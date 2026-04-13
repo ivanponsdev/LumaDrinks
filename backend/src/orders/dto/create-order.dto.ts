@@ -1,8 +1,11 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
+  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -23,6 +26,29 @@ export class OrderItemDto {
   quantity: number;
 }
 
+export class ShippingAddressDto {
+  @IsString()
+  @IsNotEmpty()
+  street: string;
+
+  @IsString()
+  @IsOptional()
+  floor?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  city: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d{5}$/, { message: 'El código postal debe tener 5 dígitos' })
+  postalCode: string;
+
+  @IsString()
+  @IsNotEmpty()
+  province: string;
+}
+
 export class CreateOrderDto {
   @IsArray()
   @ValidateNested({ each: true })
@@ -32,4 +58,8 @@ export class CreateOrderDto {
   @IsNumber()
   @Min(0)
   total: number;
+
+  @ValidateNested()
+  @Type(() => ShippingAddressDto)
+  shippingAddress: ShippingAddressDto;
 }

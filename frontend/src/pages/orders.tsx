@@ -111,15 +111,17 @@ export default function OrdersPage() {
                 <div className="flex items-center justify-between pt-3 border-t border-brand-muted/20">
                   <span
                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                      order.status === 'pending'
-                        ? 'bg-brand-accent/10 text-brand-accent'
-                        : 'bg-brand-surface text-brand-muted'
+                      order.status === 'Pendiente' ? 'bg-amber-100 text-amber-700'
+                      : order.status === 'Pagado'    ? 'bg-brand-accent/10 text-brand-accent'
+                      : order.status === 'Enviado'   ? 'bg-blue-100 text-blue-700'
+                      : order.status === 'Entregado' ? 'bg-green-100 text-green-700'
+                      : 'bg-brand-surface text-brand-muted'
                     }`}
                   >
-                    {order.status === 'pending' ? 'En proceso' : order.status}
+                    {order.status}
                   </span>
                   <span className="font-bold text-brand-primary">
-                    {Number(order.total).toFixed(2)} €
+                    {Number(order.total_paid).toFixed(2)} €
                   </span>
                 </div>
               </li>

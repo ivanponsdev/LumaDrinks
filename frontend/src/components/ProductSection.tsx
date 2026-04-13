@@ -68,18 +68,6 @@ export default function ProductSection() {
           </div>
         )}
 
-        <div className="mt-20 bg-brand-surface rounded-3xl p-8 border border-brand-muted/20 flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center gap-4 mb-4 md:mb-0">
-            <span className="text-3xl">🚚</span>
-            <div>
-              <p className="font-semibold text-brand-primary">Envío gratis en packs de suscripción</p>
-              <p className="text-sm text-brand-muted">Recibe tu dosis mensual y ahorra un 15% adicional.</p>
-            </div>
-          </div>
-          <button className="border-2 border-brand-primary text-brand-primary px-6 py-2 rounded-full font-bold hover:bg-brand-primary hover:text-brand-bg transition-all text-sm">
-            Saber más
-          </button>
-        </div>
       </div>
 
       {/* AQUÍ ESTABA EL ERROR: Eliminamos 'price' y 'color' del objeto product */}

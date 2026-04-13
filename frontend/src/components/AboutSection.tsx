@@ -1,5 +1,10 @@
-/*AboutSection.tsx*/ 
+/*AboutSection.tsx*/
+import { useState } from 'react';
+import ScienceModal from './ScienceModal';
+
 export default function AboutSection() {
+  const [isScienceOpen, setIsScienceOpen] = useState(false);
+
   return (
     <section id="por-que" className="py-32 px-10 bg-brand-bg text-center">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -17,12 +22,16 @@ export default function AboutSection() {
         
         <div className="pt-6">
           {/* Botón con el color acento de la marca y bordes suaves */}
-          <button className="border-2 border-brand-primary text-brand-primary px-10 py-3 rounded-full font-bold hover:bg-brand-primary hover:text-brand-bg transition-all 
-          duration-300 text-sm tracking-widest">
+          <button
+            onClick={() => setIsScienceOpen(true)}
+            className="border-2 border-brand-primary text-brand-primary px-10 py-3 rounded-full font-bold hover:bg-brand-primary hover:text-brand-bg transition-all duration-300 text-sm tracking-widest"
+          >
             Descubrir la ciencia
           </button>
         </div>
       </div>
+
+      <ScienceModal isOpen={isScienceOpen} onClose={() => setIsScienceOpen(false)} />
     </section>
   );
 }
