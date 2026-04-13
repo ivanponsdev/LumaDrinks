@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import Link from 'next/link';
+import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export default function CartModal({ isOpen, onClose }: CartModalProps) {
         <div className="overflow-y-auto flex-1 px-8 py-6 space-y-6 bg-white">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <span className="text-5xl mb-4">🛒</span>
+              <ShoppingCartIcon className="w-16 h-16 mb-4 text-brand-muted" aria-hidden="true" />
               <p className="text-brand-muted font-medium italic">Tu carrito está vacío.</p>
             </div>
           ) : (
