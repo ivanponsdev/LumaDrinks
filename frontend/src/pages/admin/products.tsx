@@ -250,13 +250,13 @@ export default function AdminProductsPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openEdit(p)}
-                        className="text-xs px-3 py-1.5 rounded-lg border border-brand-surface text-brand-primary hover:bg-brand-bg transition-colors"
+                        className="text-xs px-3 py-1.5 rounded-lg border border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white transition-colors font-medium"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => setPendingDelete(p)}
-                        className="text-xs px-3 py-1.5 rounded-lg border border-red-100 text-red-400 hover:bg-red-50 transition-colors"
+                        className="text-xs px-3 py-1.5 rounded-lg text-brand-muted hover:text-brand-primary hover:bg-brand-surface transition-colors"
                       >
                         Eliminar
                       </button>

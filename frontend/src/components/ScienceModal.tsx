@@ -39,7 +39,7 @@ export default function ScienceModal({ isOpen, onClose }: { isOpen: boolean; onC
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 pt-20"
       onClick={onClose}
     >
       <div
